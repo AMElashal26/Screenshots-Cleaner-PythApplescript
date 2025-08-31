@@ -1,9 +1,14 @@
-# FINAL SCRIPT: Targets "ScreenshotArchive" and uses a robust date check.
+# FINAL PRODUCTION SCRIPT (Corrected Syntax)
 
-on run {exportPath, dateString}
-	set exportFolder to POSIX file exportPath
-	set cutoffDate to date dateString
+on run {exportPath, y, m, d}
 	set oldScreenshots to {}
+	
+	-- Manually construct the date to be 100% reliable
+	set cutoffDate to (current date)
+	set year of cutoffDate to y as integer
+	set month of cutoffDate to m as integer
+	set day of cutoffDate to d as integer
+	set time of cutoffDate to 0 -- Sets it to the very beginning of that day
 	
 	tell application "Photos"
 		set allScreenshots to (every media item in album "ScreenshotArchive")
@@ -14,16 +19,19 @@ on run {exportPath, dateString}
 					set end of oldScreenshots to oneItem
 				end if
 			on error
-				-- Skip any corrupted items
+				-- Silently skip any corrupt items
 			end try
 		end repeat
 		
-		if (count of oldScreenshots) is 0 then
-			return "No screenshots found in the 'ScreenshotArchive' album older than the cutoff date."
+		-- === THIS ENTIRE BLOCK HAS BEEN MOVED INSIDE 'TELL' ===
+		set itemsFound to count of oldScreenshots
+		if itemsFound > 0 then
+			export oldScreenshots to (POSIX file exportPath) with using originals
+			return "SUCCESS: Exported " & itemsFound & " items."
+		else
+			return "SUCCESS: Found 0 items older than the cutoff date."
 		end if
+		-- === END OF MOVED BLOCK ===
 		
-		export oldScreenshots to exportFolder with using originals
 	end tell
-	
-	return "Export complete."
 end run
