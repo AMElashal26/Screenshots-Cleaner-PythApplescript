@@ -1,4 +1,4 @@
-# This script exports screenshots OLDER THAN a specific date (using metadata)
+# This script exports screenshots OLDER THAN a specific date (using filename)
 
 on run {exportPath, dateString}
 	set exportFolder to POSIX file exportPath
@@ -6,8 +6,8 @@ on run {exportPath, dateString}
 	set oldScreenshots to {}
 	
 	tell application "Photos"
-		-- 1. Get ALL media items where the 'screenshot' metadata flag is true
-		set allScreenshots to (every media item whose screenshot is true)
+		-- 1. Get ALL media items whose filename starts with "Screenshot"
+		set allScreenshots to (every media item whose filename begins with "Screenshot")
 		
 		-- 2. Loop through them one by one
 		repeat with oneItem in allScreenshots
