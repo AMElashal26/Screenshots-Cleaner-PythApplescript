@@ -1,4 +1,4 @@
-# This script exports screenshots OLDER THAN a specific date (final, robust version)
+# This script exports screenshots OLDER THAN a specific date (using metadata)
 
 on run {exportPath, dateString}
 	set exportFolder to POSIX file exportPath
@@ -6,17 +6,19 @@ on run {exportPath, dateString}
 	set oldScreenshots to {}
 	
 	tell application "Photos"
-		set allScreenshots to (every media item in album "Screenshots")
+		-- 1. Get ALL media items where the 'screenshot' metadata flag is true
+		set allScreenshots to (every media item whose screenshot is true)
 		
+		-- 2. Loop through them one by one
 		repeat with oneItem in allScreenshots
 			try
-				-- Attempt to check the date. This might fail on a corrupted item.
+				-- 3. Check the date of each item individually
 				if (creation date of oneItem) < cutoffDate then
+					-- 4. If it's old, add it to our list
 					set end of oldScreenshots to oneItem
 				end if
 			on error
-				-- If an error occurs, do nothing and let the loop continue.
-				-- This effectively skips the broken item.
+				-- If an error occurs, skip the broken item.
 			end try
 		end repeat
 		
@@ -24,6 +26,7 @@ on run {exportPath, dateString}
 			return "No screenshots found before the specified date."
 		end if
 		
+		-- 5. Export only the items from our final list
 		export oldScreenshots to exportFolder with using originals
 	end tell
 	
