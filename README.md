@@ -1,0 +1,1 @@
+# Screenshots-Cleaner-PythApplescript
