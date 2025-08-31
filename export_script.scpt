@@ -1,4 +1,4 @@
-# This script exports screenshots OLDER THAN a specific date (using filename)
+# FINAL SCRIPT: Targets the "ScreenshotArchive" Smart Album
 
 on run {exportPath, dateString}
 	set exportFolder to POSIX file exportPath
@@ -6,27 +6,26 @@ on run {exportPath, dateString}
 	set oldScreenshots to {}
 	
 	tell application "Photos"
-		-- 1. Get ALL media items whose filename starts with "Screenshot"
-		set allScreenshots to (every media item whose filename begins with "Screenshot")
+		-- 1. Get every item from our new Smart Album
+		-- This is the only line that needed a major change.
+		set allScreenshots to (every media item in album "ScreenshotArchive")
 		
-		-- 2. Loop through them one by one
+		-- 2. Our robust loop checks the date of each item found
 		repeat with oneItem in allScreenshots
 			try
-				-- 3. Check the date of each item individually
 				if (creation date of oneItem) < cutoffDate then
-					-- 4. If it's old, add it to our list
 					set end of oldScreenshots to oneItem
 				end if
 			on error
-				-- If an error occurs, skip the broken item.
+				-- Skip any corrupted items
 			end try
 		end repeat
 		
 		if (count of oldScreenshots) is 0 then
-			return "No screenshots found before the specified date."
+			return "No screenshots found in the 'ScreenshotArchive' album older than the cutoff date."
 		end if
 		
-		-- 5. Export only the items from our final list
+		-- 3. Export the final list
 		export oldScreenshots to exportFolder with using originals
 	end tell
 	
