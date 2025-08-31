@@ -1,37 +1,20 @@
-# FINAL PRODUCTION SCRIPT (Corrected Syntax)
+# FINAL SCRIPT (Brute-Force Export)
+# Exports EVERYTHING from the Smart Album without any filtering.
 
-on run {exportPath, y, m, d}
-	set oldScreenshots to {}
-	
-	-- Manually construct the date to be 100% reliable
-	set cutoffDate to (current date)
-	set year of cutoffDate to y as integer
-	set month of cutoffDate to m as integer
-	set day of cutoffDate to d as integer
-	set time of cutoffDate to 0 -- Sets it to the very beginning of that day
-	
+on run {exportPath}
 	tell application "Photos"
-		set allScreenshots to (every media item in album "ScreenshotArchive")
-		
-		repeat with oneItem in allScreenshots
-			try
-				if (creation date of oneItem) < cutoffDate then
-					set end of oldScreenshots to oneItem
-				end if
-			on error
-				-- Silently skip any corrupt items
-			end try
-		end repeat
-		
-		-- === THIS ENTIRE BLOCK HAS BEEN MOVED INSIDE 'TELL' ===
-		set itemsFound to count of oldScreenshots
-		if itemsFound > 0 then
-			export oldScreenshots to (POSIX file exportPath) with using originals
-			return "SUCCESS: Exported " & itemsFound & " items."
-		else
-			return "SUCCESS: Found 0 items older than the cutoff date."
-		end if
-		-- === END OF MOVED BLOCK ===
-		
+		try
+			set allScreenshots to (every media item in album "ScreenshotArchive")
+			
+			if (count of allScreenshots) is 0 then
+				return "ERROR: The 'ScreenshotArchive' album is empty."
+			end if
+			
+			export allScreenshots to (POSIX file exportPath) with using originals
+			
+			return "SUCCESS: Exported " & (count of allScreenshots) & " total items for filtering."
+		on error errMsg
+			return "ERROR: Failed during export. " & errMsg
+		end try
 	end tell
 end run
